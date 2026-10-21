@@ -46,7 +46,8 @@ OVERRIDE_MODE = "LOITER"         # mode set when the pilot takes over manually
 WAYPOINT_REACHED_RADIUS_M = 1.5
 WAYPOINT_ALT_TOLERANCE_M = 1     # test
 WAYPOINT_TIMEOUT_S = 180.0
-WAYPOINT_HOLD_S = 0.5
+WAYPOINT_HOLD_S = 0.0
+WAYPOINT_ACCEPT_RADIUS_M = 1.5  
 TARGET_REFRESH_INTERVAL_S = 1.0
 MIN_SATELLITES = 8
 ZONE_CORNERS = None              # from input
@@ -428,7 +429,10 @@ def _sweep(link, state, airborne):
             err = horizontal_distance_m(state.latitude_deg, state.longitude_deg, lat, lon)
             alt_ok = (state.relative_altitude_m is not None
                       and abs(state.relative_altitude_m - alt) <= WAYPOINT_ALT_TOLERANCE_M)
-            if err <= WAYPOINT_REACHED_RADIUS_M and alt_ok:
+            is_last = (i == len(route))
+            radius = WAYPOINT_REACHED_RADIUS_M if is_last else WAYPOINT_ACCEPT_RADIUS_M
+            if err <= radius and alt_ok:    
+
                 print(f"  reached WP{i:02d} (error {err:.1f} m, alt {state.relative_altitude_m:.1f} m)")
                 break
             if time.monotonic() > deadline:
